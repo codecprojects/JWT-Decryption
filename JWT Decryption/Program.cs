@@ -12,18 +12,24 @@ namespace JWT_Decryption
             // 2 - Read JWT Token, using .NET and NuGet to decrypt and get contents
 
             // 3 - 
+            
+            // When signed with following test key, it produces a signed Base64 Value
+            string JWStestKey =           "Fdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I";
 
-            string signedTestKey = "Fdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I";
+            //  Produced Base64 value
+            string signedBase64Value =    "eyJhbGciOiJIUzI1NiJ9" +  // Header 
+                                          ".eyJpc3MiOiJEQUZNIiwiZXhwIjoxNTU3NzQ3MzU4LCJjaWQiOjIyMTI3fQ" +   // Payload
+                                          ".pGhHG38KChajrqZ3eLdPkufmYRUR2OqiF0z_9XLlSVc";       // Secret (Verify Signature)
 
-            string signedBase64Value = "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJEQUZNIiwiZXhwIjoxNTU3NzQ3MzU4LCJjaWQiOjIyMTI3fQ.pGhHG38KChajrqZ3eLdPkufmYRUR2OqiF0z_9XLlSVc";
+            string encryptedTestKey =     "Bdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I";
 
-            string encryptedTestKey = "Bdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I";
+            string encryptedBase64Value = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiY3R5Ijoiand0In0" +
+                                          "..46h3grwnT9YzIsWl.3Gk6ZqVyqrmVPG50B3lNBGfwXJOJJHrb8hmIyEMK5DfUSoikm9" +
+                                          "_G_87_WuEY0SPJfpq5Lr1rx7HJ3D1cHHIrlanH68F5MKSbPE_w_bEu6dG2QniwcsH8QaYTH0vNnuwkAxOA" +
+                                          "_bck_OR4D0FpMepvRzUMZLLkzHYWBWvV.J8AwlEqTM0JlbfQZVeFabw";
 
-            string encryptedBase64Value = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiY3R5Ijoiand0In0..46h3grwnT9YzIsWl.3Gk6ZqVyqrmVPG50B3lNBGfwXJOJJHrb8hmIyEMK5DfUSoikm9_G_87_WuEY0SPJfpq5Lr1rx7HJ3D1cHHIrlanH68F5MKSbPE_w_bEu6dG2QniwcsH8QaYTH0vNnuwkAxOA_bck_OR4D0FpMepvRzUMZLLkzHYWBWvV.J8AwlEqTM0JlbfQZVeFabw";
 
             JwtHeader header = new JwtHeader();
-
-            
             JwtPayload payload = new JwtPayload();
 
             //HMACSHA256(
@@ -56,8 +62,8 @@ namespace JWT_Decryption
         //eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJEQUZNIiwiZXhwIjoxNTU3NzQ3MzU4LCJjaWQiOjIyMTI3fQ.pGhHG38KChajrqZ3eLdPkufmYRUR2OqiF0z_9XLlSVc
         //    }
 
-        //        Which is encrypted with the following test key:
-        //Bdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I
+        /* Which is encrypted with the following test key:   */
+        /* Bdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I              */
 
 /* To produce encrypted Base64 value: 
  * eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiY3R5Ijoiand0In0

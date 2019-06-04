@@ -11,11 +11,46 @@ namespace JWT_Decryption
     {
         static void Main(string[] args)
         {
-
-            
-             
+            DisplayMenu(); // Display options to the User
         }
 
+        // Display Menu
+        public static void DisplayMenu()
+        {
+            Console.WriteLine("Hello!".PadLeft(20));
+            Console.WriteLine("-----------------------------------------------");
+            Console.WriteLine("Welcome to the JSON Web Token Tool".PadLeft(15));
+            Console.WriteLine("-----------------------------------------------\n");
+            Console.WriteLine("Please choose one of the following options\n".PadLeft(5));
+            Console.WriteLine("1 - Decryption\n");
+            Console.WriteLine("2 - Encryption\n");
+            Console.WriteLine("3 - Exit");
+            Console.WriteLine("-----------------------------------------------\n");
+            int options = int.Parse(Console.ReadLine());
+            Console.WriteLine("-----------------------------------------------\n");
+
+            switch (options)
+            {
+                case 1:
+                    EncryptJWT();
+                    break;
+                case 2:
+                    DecryptJWT();
+                    break;
+                case 3:
+                    Exit();
+                    break;
+            }
+
+        }
+
+        public static void Exit()
+        {
+            Console.Clear();
+            Console.WriteLine("\n\n");
+            Console.WriteLine("GOODBYE".PadLeft(25));
+            Console.ReadLine();
+        }
         // Encode
         public static string Base64Encode(string plainText)
         {
@@ -33,6 +68,8 @@ namespace JWT_Decryption
         // Encrypt JWT Token
         public static void EncryptJWT()
         {
+            Console.WriteLine("ENCRYPTING TOKEN");
+
             const string sec = "ProEMLh5e_qnzdNUQrqdHPgp";
             const string sec1 = "ProEMLh5e_qnzdNU";
             var securityKey = new SymmetricSecurityKey(Encoding.Default.GetBytes(sec));
@@ -71,10 +108,12 @@ namespace JWT_Decryption
             // then no claims are retrieved and the token is safe guarded.
             var jwt = new JwtSecurityToken(tokenString);
         }
-        
+
         // Validate/Decrypt JWT Token
         public static void DecryptJWT()
         {
+            Console.WriteLine("DECRYPTING TOKEN");
+
             const string sec = "ProEMLh5e_qnzdNUQrqdHPgp";
             const string sec1 = "ProEMLh5e_qnzdNU";
             var securityKey = new SymmetricSecurityKey(Encoding.Default.GetBytes(sec));
@@ -85,6 +124,7 @@ namespace JWT_Decryption
 
             // If we retrieve the token without decrypting the claims, we won't get any claims
             // DO not use this jwt variable
+
             var jwt = new JwtSecurityToken(tokenString);
 
             // Verification

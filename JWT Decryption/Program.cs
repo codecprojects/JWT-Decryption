@@ -14,7 +14,6 @@ namespace JWT_Decryption
             DisplayMenu(); // Display options to the User
         }
 
-        // Display Menu
         public static void DisplayMenu()
         {
             Console.WriteLine("Hello!".PadLeft(20));
@@ -32,16 +31,15 @@ namespace JWT_Decryption
             switch (options)
             {
                 case 1:
-                    EncryptJWT();
+                    DecryptJWT2();
                     break;
                 case 2:
-                    DecryptJWT();
+                    EncryptJWT2();
                     break;
                 case 3:
                     Exit();
                     break;
             }
-
         }
 
         public static void Exit()
@@ -51,22 +49,20 @@ namespace JWT_Decryption
             Console.WriteLine("GOODBYE".PadLeft(25));
             Console.ReadLine();
         }
-        // Encode
-        public static string Base64Encode(string plainText)
+
+        public static void EncryptJWT1()
         {
-            var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
-            return Convert.ToBase64String(plainTextBytes);
+
         }
 
-        // Decode
-        public static string Base64Decode(string base64EncodedData)
+        public static void DecryptJWT1()
         {
-            var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
-            return Encoding.UTF8.GetString(base64EncodedBytes);
+
         }
+
 
         // Encrypt JWT Token
-        public static void EncryptJWT()
+        public static void EncryptJWT2()
         {
             Console.WriteLine("ENCRYPTING TOKEN");
 
@@ -83,11 +79,10 @@ namespace JWT_Decryption
 {
     new Claim("sub", "test"),
 };
-
             var ep = new EncryptingCredentials(
-                securityKey1,
-                SecurityAlgorithms.Aes128KW,
-                SecurityAlgorithms.Aes128CbcHmacSha256);
+                            securityKey1,
+                            SecurityAlgorithms.Aes128KW,
+                            SecurityAlgorithms.Aes128CbcHmacSha256);
 
             var handler = new JwtSecurityTokenHandler();
 
@@ -101,16 +96,22 @@ namespace JWT_Decryption
                 signingCredentials,
                 ep);
 
-
             string tokenString = handler.WriteToken(jwtSecurityToken);
 
             // If someone tries to view the JWT without validating/decrypting the token,
             // then no claims are retrieved and the token is safe guarded.
             var jwt = new JwtSecurityToken(tokenString);
+
+            Console.Write("The claims that were encoded were: ");
+            claims.ForEach(Console.WriteLine);
+            Console.WriteLine("\nDecoded JWT is: {0} \n", jwt);
+            Console.WriteLine("Encoded token string is: {0}", tokenString);
+            Console.ReadLine();
+
         }
 
         // Validate/Decrypt JWT Token
-        public static void DecryptJWT()
+        public static void DecryptJWT2()
         {
             Console.WriteLine("DECRYPTING TOKEN");
 
@@ -125,7 +126,9 @@ namespace JWT_Decryption
             // If we retrieve the token without decrypting the claims, we won't get any claims
             // DO not use this jwt variable
 
-            var jwt = new JwtSecurityToken(tokenString);
+            //var jwt = new JwtSecurityToken(tokenString);
+            JwtSecurityToken jwt = new JwtSecurityToken(tokenString);
+
 
             // Verification
             var tokenValidationParameters = new TokenValidationParameters()
@@ -148,6 +151,5 @@ namespace JWT_Decryption
 
             handler.ValidateToken(tokenString, tokenValidationParameters, out validatedToken);
         }
-
     }
 }

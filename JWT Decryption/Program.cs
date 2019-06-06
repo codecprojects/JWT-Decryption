@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 
@@ -12,7 +11,7 @@ namespace JWT_Decryption
     {
         static void Main(string[] args)
         {
-            //DisplayMenu(); // Display options to the User
+            DisplayMenu(); // Display options to the User
 
             // Details from client summarized
             // 1. JWS - JSON consisting of header & payload
@@ -39,11 +38,7 @@ namespace JWT_Decryption
             //            }
             // 5. Encrypt TestKey - Bdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I
             // 6. Produced base64 value - eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiY3R5Ijoiand0In0..46h3grwnT9YzIsWl.3Gk6ZqVyqrmVPG50B3lNBGfwXJOJJHrb8hmIyEMK5DfUSoikm9_G_87_WuEY0SPJfpq5Lr1rx7HJ3D1cHHIrlanH68F5MKSbPE_w_bEu6dG2QniwcsH8QaYTH0vNnuwkAxOA_bck_OR4D0FpMepvRzUMZLLkzHYWBWvV.J8AwlEqTM0JlbfQZVeFabw
-
-
-           
         }
-
         public static void ClientDetails()
         {
             // As discussed, and example of our JWE generation follows.
@@ -90,7 +85,7 @@ namespace JWT_Decryption
             Console.WriteLine("Please choose one of the following options\n".PadLeft(5));
             Console.WriteLine("1 - Decryption\n");
             Console.WriteLine("2 - Encryption\n");
-            Console.WriteLine("3 - Exit");
+            Console.WriteLine("3 - Exit\n");
             Console.WriteLine("4 - Create and Read Token");
             Console.WriteLine("-----------------------------------------------\n");
             int options = int.Parse(Console.ReadLine());
@@ -145,19 +140,27 @@ namespace JWT_Decryption
                { "iss","DAFM"}
            };
             JwtSecurityToken secToken = new JwtSecurityToken(header, payload);
+
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
 
+            Console.WriteLine("Enter you token string to decrypt it :");
             // Token to String so you can use it in your client
-            string tokenString = handler.WriteToken(secToken);
+            string tokenString = Console.ReadLine();// handler.WriteToken(secToken);
 
-            Console.WriteLine(tokenString);
+            Console.WriteLine("Token string (not ecnrypted) is : {0}\n", tokenString);
             Console.WriteLine("Consume Token");
 
             // And finally when you receive token from client
             // you can either validate it or try to read
             JwtSecurityToken token = handler.ReadJwtToken(tokenString);
+            Console.WriteLine("JWT Security token (encrypted) is {0}", token);
 
-            Console.WriteLine(token.Payload.First().Value);
+            // Console.WriteLine(token.Payload.First().Value);
+            Console.WriteLine("The values extracted from the payload are: ");
+            foreach (var t in token.Payload)
+            {
+                Console.WriteLine(t);
+            }
             Console.ReadLine();
         }
         // Encrypt JWT Token
@@ -167,10 +170,10 @@ namespace JWT_Decryption
 
             const string sec = "ProEMLh5e_qnzdNUQrqdHPgp";
             const string sec1 = "ProEMLh5e_qnzdNU";
-            var securityKey = new SymmetricSecurityKey(Encoding.Default.GetBytes(sec));
-            var securityKey1 = new SymmetricSecurityKey(Encoding.Default.GetBytes(sec1));
+            SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.Default.GetBytes(sec));
+            SymmetricSecurityKey securityKey1 = new SymmetricSecurityKey(Encoding.Default.GetBytes(sec1));
 
-            var signingCredentials = new SigningCredentials(
+            SigningCredentials signingCredentials = new SigningCredentials(
                 securityKey,
                 SecurityAlgorithms.HmacSha256);
 
@@ -178,14 +181,14 @@ namespace JWT_Decryption
 {
     new Claim("sub", "test"),
 };
-            var ep = new EncryptingCredentials(
+            EncryptingCredentials ep = new EncryptingCredentials(
                             securityKey1,
                             SecurityAlgorithms.Aes128KW,
                             SecurityAlgorithms.Aes128CbcHmacSha256);
 
-            var handler = new JwtSecurityTokenHandler();
+            JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
 
-            var jwtSecurityToken = handler.CreateJwtSecurityToken(
+            JwtSecurityToken jwtSecurityToken = handler.CreateJwtSecurityToken(
                 "issuer",
                 "Audience",
                 new ClaimsIdentity(claims),
@@ -199,7 +202,7 @@ namespace JWT_Decryption
 
             // If someone tries to view the JWT without validating/decrypting the token,
             // then no claims are retrieved and the token is safe guarded.
-            var jwt = new JwtSecurityToken(tokenString);
+            JwtSecurityToken jwt = new JwtSecurityToken(tokenString);
 
             Console.Write("The claims that were encoded were: ");
             claims.ForEach(Console.WriteLine);
@@ -215,8 +218,8 @@ namespace JWT_Decryption
 
             const string sec = "ProEMLh5e_qnzdNUQrqdHPgp";
             const string sec1 = "ProEMLh5e_qnzdNU";
-            var securityKey = new SymmetricSecurityKey(Encoding.Default.GetBytes(sec));
-            var securityKey1 = new SymmetricSecurityKey(Encoding.Default.GetBytes(sec1));
+            SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.Default.GetBytes(sec));
+            SymmetricSecurityKey securityKey1 = new SymmetricSecurityKey(Encoding.Default.GetBytes(sec1));
 
             // This is the input JWT which we want to validate.
             string tokenString = string.Empty;
@@ -224,12 +227,10 @@ namespace JWT_Decryption
             // If we retrieve the token without decrypting the claims, we won't get any claims
             // DO not use this jwt variable
 
-            //var jwt = new JwtSecurityToken(tokenString);
             JwtSecurityToken jwt = new JwtSecurityToken(tokenString);
 
-
             // Verification
-            var tokenValidationParameters = new TokenValidationParameters()
+            TokenValidationParameters tokenValidationParameters = new TokenValidationParameters()
             {
                 ValidAudiences = new string[]
                 {
@@ -245,7 +246,7 @@ namespace JWT_Decryption
             };
 
             SecurityToken validatedToken;
-            var handler = new JwtSecurityTokenHandler();
+            JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
 
             handler.ValidateToken(tokenString, tokenValidationParameters, out validatedToken);
         }

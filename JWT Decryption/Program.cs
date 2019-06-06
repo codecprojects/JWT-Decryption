@@ -12,52 +12,75 @@ namespace JWT_Decryption
     {
         static void Main(string[] args)
         {
-            DisplayMenu(); // Display options to the User
-                           // Define const Key this should be private secret key  stored in some safe place
-            string key = "401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b3727429090fb337591abd3e44453b954555b7a0812e1081c39b740293f765eae731f5a65ed1";
+            //DisplayMenu(); // Display options to the User
 
-           // Create Security key  using private key above:
-           // not that latest version of JWT using Microsoft namespace instead of System
-            var securityKey = new Microsoft
-               .IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-
-            // Also note that securityKey length should be >256b
-            // so you have to make sure that your private key has a proper length
-            //
-            var credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials
-                              (securityKey, SecurityAlgorithms.HmacSha256Signature);
-
-            //  Finally create a Token
-            var header = new JwtHeader(credentials);
-
-            //Some PayLoad that contain information about the  customer
-            var payload = new JwtPayload
-           {
-               { "some ", "hello "},
-               { "scope", "http://dummy.com/"},
-           };
-
-            //
-            var secToken = new JwtSecurityToken(header, payload);
-            var handler = new JwtSecurityTokenHandler();
-
-            // Token to String so you can use it in your client
-            var tokenString = handler.WriteToken(secToken);
-
-            Console.WriteLine(tokenString);
-            Console.WriteLine("Consume Token");
+            // Details from client summarized
+            // 1. JWS - JSON consisting of header & payload
+            //           {                         // header
+            //                "alg":"HS256"
+            //           }
+            //          {                         // payload
+            //                "iss":"DAFM",
+            //                "exp":1557747358,
+            //                "cid":22127
+            //            }
+            // 2. Signed TestKey - Fdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I
+            // 3. Produced Signed base64 value - Not Encrypted
+            //    eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJEQUZNIiwiZXhwIjoxNTU3NzQ3MzU4LCJjaWQiOjIyMTI3fQ.pGhHG38KChajrqZ3eLdPkufmYRUR2OqiF0z_9XLlSVc
+            // 4. Wrap the JWS as a payload in a JWE
+            //    We then wrap this JWS as payload in a JWE:
+            //            {
+            //                "alg":"dir",
+            //                "enc":"A256GCM",
+            //                "cty":"jwt"
+            //            }
+            //{
+            //    eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJEQUZNIiwiZXhwIjoxNTU3NzQ3MzU4LCJjaWQiOjIyMTI3fQ.pGhHG38KChajrqZ3eLdPkufmYRUR2OqiF0z_9XLlSVc
+            //            }
+            // 5. Encrypt TestKey - Bdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I
+            // 6. Produced base64 value - eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiY3R5Ijoiand0In0..46h3grwnT9YzIsWl.3Gk6ZqVyqrmVPG50B3lNBGfwXJOJJHrb8hmIyEMK5DfUSoikm9_G_87_WuEY0SPJfpq5Lr1rx7HJ3D1cHHIrlanH68F5MKSbPE_w_bEu6dG2QniwcsH8QaYTH0vNnuwkAxOA_bck_OR4D0FpMepvRzUMZLLkzHYWBWvV.J8AwlEqTM0JlbfQZVeFabw
 
 
-            // And finally when  you received token from client
-            // you can  either validate it or try to  read
-            var token = handler.ReadJwtToken(tokenString);
-
-            Console.WriteLine(token.Payload.First().Value);
-
-            Console.ReadLine();
-
+           
         }
 
+        public static void ClientDetails()
+        {
+            // As discussed, and example of our JWE generation follows.
+            //We are initially preparing JWS:
+
+            //{                         // header
+            //    "alg":"HS256"
+            //            }
+            //{                         // payload
+            //    "iss":"DAFM",
+            //                "exp":1557747358,
+            //                "cid":22127
+            //            }
+
+            // Which is signed with the following test key:
+            // Fdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I
+
+            //To produce 'SIGNED' Base64 value:
+            //eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJEQUZNIiwiZXhwIjoxNTU3NzQ3MzU4LCJjaWQiOjIyMTI3fQ.pGhHG38KChajrqZ3eLdPkufmYRUR2OqiF0z_9XLlSVc
+
+            //We then wrap this JWS as payload in a JWE:
+            //            {
+            //    "alg":"dir",
+            //                "enc":"A256GCM",
+            //                "cty":"jwt"
+            //            }
+            //{
+            //    eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJEQUZNIiwiZXhwIjoxNTU3NzQ3MzU4LCJjaWQiOjIyMTI3fQ.pGhHG38KChajrqZ3eLdPkufmYRUR2OqiF0z_9XLlSVc
+            //            }
+
+            // Which is encrypted with the following test key:
+            // Bdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I
+
+            //  To produce encrypted Base64 value:
+            //  eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiY3R5Ijoiand0In0..46h3grwnT9YzIsWl.3Gk6ZqVyqrmVPG50B3lNBGfwXJOJJHrb8hmIyEMK5DfUSoikm9_G_87_WuEY0SPJfpq5Lr1rx7HJ3D1cHHIrlanH68F5MKSbPE_w_bEu6dG2QniwcsH8QaYTH0vNnuwkAxOA_bck_OR4D0FpMepvRzUMZLLkzHYWBWvV.J8AwlEqTM0JlbfQZVeFabw
+
+        }
         public static void DisplayMenu()
         {
             Console.WriteLine("Hello!".PadLeft(20));
@@ -68,6 +91,7 @@ namespace JWT_Decryption
             Console.WriteLine("1 - Decryption\n");
             Console.WriteLine("2 - Encryption\n");
             Console.WriteLine("3 - Exit");
+            Console.WriteLine("4 - Create and Read Token");
             Console.WriteLine("-----------------------------------------------\n");
             int options = int.Parse(Console.ReadLine());
             Console.WriteLine("-----------------------------------------------\n");
@@ -75,17 +99,19 @@ namespace JWT_Decryption
             switch (options)
             {
                 case 1:
-                    DecryptJWT2();
+                    DecryptJWT();
                     break;
                 case 2:
-                    EncryptJWT2();
+                    EncryptJWT();
+                    break;
+                case 4:
+                    CreateReadToken();
                     break;
                 case 3:
                     Exit();
                     break;
             }
         }
-
         public static void Exit()
         {
             Console.Clear();
@@ -94,19 +120,48 @@ namespace JWT_Decryption
             Console.ReadLine();
         }
 
-        public static void EncryptJWT1()
+        public static void CreateReadToken()
         {
+            // Define const Key this should be private secret key stored in some safe place
+            string privateKey = "Fdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I";
 
+            // Create Security keyusing private key above:
+            // not that latest version of JWT using Microsoft namespace instead of System
+            SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(privateKey));
+
+            // Also note that securityKey length should be >256b
+            // so you have to make sure that your private key has a proper length
+            SigningCredentials credentials = new SigningCredentials
+                              (securityKey, SecurityAlgorithms.HmacSha256Signature);
+
+            //  Finally create a Token
+            JwtHeader header = new JwtHeader(credentials);
+
+            //Some PayLoad that contain information about the  customer
+            JwtPayload payload = new JwtPayload
+           {
+               { "exp ", "1557747358"},
+               { "cid", "22127"},
+               { "iss","DAFM"}
+           };
+            JwtSecurityToken secToken = new JwtSecurityToken(header, payload);
+            JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+
+            // Token to String so you can use it in your client
+            string tokenString = handler.WriteToken(secToken);
+
+            Console.WriteLine(tokenString);
+            Console.WriteLine("Consume Token");
+
+            // And finally when you receive token from client
+            // you can either validate it or try to read
+            JwtSecurityToken token = handler.ReadJwtToken(tokenString);
+
+            Console.WriteLine(token.Payload.First().Value);
+            Console.ReadLine();
         }
-
-        public static void DecryptJWT1()
-        {
-
-        }
-
-
         // Encrypt JWT Token
-        public static void EncryptJWT2()
+        public static void EncryptJWT()
         {
             Console.WriteLine("ENCRYPTING TOKEN");
 
@@ -153,9 +208,8 @@ namespace JWT_Decryption
             Console.ReadLine();
 
         }
-
         // Validate/Decrypt JWT Token
-        public static void DecryptJWT2()
+        public static void DecryptJWT()
         {
             Console.WriteLine("DECRYPTING TOKEN");
 

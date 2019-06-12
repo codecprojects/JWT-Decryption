@@ -1,4 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,7 +14,51 @@ namespace JWT_Decryption
 
         static void Main(string[] args)
         {
-            DisplayMenu(); // Display options to the User
+          //  DisplayMenu(); // Display options to the User
+          
+            //Assume the input is in a control called txtJwtIn,
+            Console.WriteLine("Enter JWT");
+            string jwtInput = Console.ReadLine();
+            string jwtOutput = "";
+
+            //and the output will be placed in a control called txtJwtOut
+            JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
+            // string jwtInput = txtJwtIn.Text;
+
+            //Check if readable token (string is in a JWT format)
+            bool readableToken = jwtHandler.CanReadToken(jwtInput);
+
+            if (readableToken != true)
+            {
+                Console.WriteLine("The token doesn't seem to be in a proper JWT format."); ;
+            }
+            if (readableToken == true)
+            {
+                JwtSecurityToken token = jwtHandler.ReadJwtToken(jwtInput);
+
+                //Extract the headers of the JWT
+                JwtHeader headers = token.Header;
+                string jwtHeader = "{";
+
+                foreach (KeyValuePair<string, object> h in headers)
+                {
+                    jwtHeader += '"' + h.Key + "\":\"" + h.Value + "\",";
+                }
+                jwtHeader += "}";
+                Console.WriteLine("Header:\r\n" + JToken.Parse(jwtHeader).ToString(Formatting.Indented));
+
+                //Extract the payload of the JWT
+                IEnumerable<Claim> claims = token.Claims;
+                string jwtPayload = "{";
+                foreach (Claim c in claims)
+                {
+                    jwtPayload += '"' + c.Type + "\":\"" + c.Value + "\",";
+                }
+                jwtPayload += "}";
+                jwtOutput += "\r\nPayload:\r\n" + JToken.Parse(jwtPayload).ToString(Formatting.Indented);
+                Console.WriteLine(jwtOutput.ToString());
+                Console.ReadLine();
+            }
 
             #region Region: Details from client summarized
             // 1. JWS - JSON consisting of header & payload

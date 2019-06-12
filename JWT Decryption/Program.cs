@@ -13,7 +13,7 @@ namespace JWT_Decryption
         {
             DisplayMenu(); // Display options to the User
 
-            // Details from client summarized
+            #region Region: Details from client summarized
             // 1. JWS - JSON consisting of header & payload
             //           {                         // header
             //                "alg":"HS256"
@@ -38,9 +38,9 @@ namespace JWT_Decryption
             //            }
             // 5. Encrypt TestKey - Bdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I
             // 6. Produced base64 value - eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiY3R5Ijoiand0In0..46h3grwnT9YzIsWl.3Gk6ZqVyqrmVPG50B3lNBGfwXJOJJHrb8hmIyEMK5DfUSoikm9_G_87_WuEY0SPJfpq5Lr1rx7HJ3D1cHHIrlanH68F5MKSbPE_w_bEu6dG2QniwcsH8QaYTH0vNnuwkAxOA_bck_OR4D0FpMepvRzUMZLLkzHYWBWvV.J8AwlEqTM0JlbfQZVeFabw
-        }
-        public static void ClientDetails()
-        {
+            #endregion
+
+            #region Region: Client Requirements
             // As discussed, and example of our JWE generation follows.
             //We are initially preparing JWS:
 
@@ -74,37 +74,52 @@ namespace JWT_Decryption
 
             //  To produce encrypted Base64 value:
             //  eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiY3R5Ijoiand0In0..46h3grwnT9YzIsWl.3Gk6ZqVyqrmVPG50B3lNBGfwXJOJJHrb8hmIyEMK5DfUSoikm9_G_87_WuEY0SPJfpq5Lr1rx7HJ3D1cHHIrlanH68F5MKSbPE_w_bEu6dG2QniwcsH8QaYTH0vNnuwkAxOA_bck_OR4D0FpMepvRzUMZLLkzHYWBWvV.J8AwlEqTM0JlbfQZVeFabw
-
+            #endregion
         }
         public static void DisplayMenu()
         {
-            Console.WriteLine("Hello!".PadLeft(20));
+            try
+            {
+                Console.WriteLine("Hello!".PadLeft(20));
             Console.WriteLine("-----------------------------------------------");
             Console.WriteLine("Welcome to the JSON Web Token Tool".PadLeft(15));
             Console.WriteLine("-----------------------------------------------\n");
             Console.WriteLine("Please choose one of the following options\n".PadLeft(5));
             Console.WriteLine("1 - Decryption\n");
             Console.WriteLine("2 - Encryption\n");
-            Console.WriteLine("3 - Exit\n");
-            Console.WriteLine("4 - Create and Read Token");
+            Console.WriteLine("3 - Create and Read Token\n");
+            Console.WriteLine("4 - Exit\n");
             Console.WriteLine("-----------------------------------------------\n");
             int options = int.Parse(Console.ReadLine());
             Console.WriteLine("-----------------------------------------------\n");
 
-            switch (options)
+           
+                switch (options)
+                {
+                    default:
+                        Console.WriteLine("YOU HAVE NOT SELECTED A NUMBER FROM THE MENU!\n" +
+                            "\nThe number you have selected is: " + options + "\n \nSelect a number from 1-4");
+                        Console.ReadLine();
+                        break;
+                    case 1:
+                        DecryptJWT();
+                        break;
+                    case 2:
+                        EncryptJWT();
+                        break;
+                    case 3:
+                        CreateReadToken();
+                        break;
+                    case 4:
+                        Exit();
+                        break;
+
+                }
+            }
+            catch (Exception e)
             {
-                case 1:
-                    DecryptJWT();
-                    break;
-                case 2:
-                    EncryptJWT();
-                    break;
-                case 4:
-                    CreateReadToken();
-                    break;
-                case 3:
-                    Exit();
-                    break;
+                Console.WriteLine("\n"+ e.Message);
+                Console.WriteLine("\nEnter a number from 1-4\n");
             }
         }
         public static void Exit()
@@ -114,18 +129,17 @@ namespace JWT_Decryption
             Console.WriteLine("GOODBYE".PadLeft(25));
             Console.ReadLine();
         }
-
         public static void CreateReadToken()
         {
-            // Define const Key this should be private secret key stored in some safe place
+            // Define const Key this should be private secret key stored in some safe place, preferably config settings on server
             string privateKey = "Fdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I";
 
-            // Create Security keyusing private key above:
+            // Create Security key  using private key above:
             // not that latest version of JWT using Microsoft namespace instead of System
             SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(privateKey));
 
             // Also note that securityKey length should be >256b
-            // so you have to make sure that your private key has a proper length
+            // So you have to make sure that your private key has a proper length
             SigningCredentials credentials = new SigningCredentials
                               (securityKey, SecurityAlgorithms.HmacSha256Signature);
 
@@ -163,7 +177,6 @@ namespace JWT_Decryption
             }
             Console.ReadLine();
         }
-        // Encrypt JWT Token
         public static void EncryptJWT()
         {
             Console.WriteLine("ENCRYPTING TOKEN");
@@ -211,23 +224,22 @@ namespace JWT_Decryption
             Console.ReadLine();
 
         }
-        // Validate/Decrypt JWT Token
         public static void DecryptJWT()
         {
             Console.WriteLine("DECRYPTING TOKEN");
 
-            const string sec = "ProEMLh5e_qnzdNUQrqdHPgp";
-            const string sec1 = "ProEMLh5e_qnzdNU";
+            const string sec = "Fdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I"; // issuer signing key
+            const string sec1 = "Bdh9u8rINxfivbrianbbVT1u232VQBZYKx1HGAGPt2I";                         // token decryption key
             SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.Default.GetBytes(sec));
             SymmetricSecurityKey securityKey1 = new SymmetricSecurityKey(Encoding.Default.GetBytes(sec1));
 
             // This is the input JWT which we want to validate.
-            string tokenString = string.Empty;
+            string tokenString = "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJEQUZNIiwiZXhwIjoxNTU3NzQ3MzU4LCJjaWQiOjIyMTI3fQ.pGhHG38KChajrqZ3eLdPkufmYRUR2OqiF0z_9XLlSVc";
 
             // If we retrieve the token without decrypting the claims, we won't get any claims
             // DO not use this jwt variable
 
-            JwtSecurityToken jwt = new JwtSecurityToken(tokenString);
+            //JwtSecurityToken jwt = new JwtSecurityToken(tokenString);
 
             // Verification
             TokenValidationParameters tokenValidationParameters = new TokenValidationParameters()
@@ -249,6 +261,11 @@ namespace JWT_Decryption
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
 
             handler.ValidateToken(tokenString, tokenValidationParameters, out validatedToken);
+            JwtSecurityToken jwt = new JwtSecurityToken(tokenString);
+
+
+            // Display token to User
+            //Console.WriteLine("The Decrypted token's values is : {0}", jwt );
         }
     }
 }
